@@ -1,9 +1,28 @@
 # Fault_tolerant_computing
 
-The main pourpose of this repo is to have a registry of all the assesments for the class of Fault tolerant computing on the university of Guadalajara (UDG).
+## Assigment 4: Example of tools for error handling
 
-Tha main branch will be intact with the current progress on the class. Said that, each branch under this repo will be a assesment with is own readme explaining the functionallity (this only applay to codding assesments).
+How to run this app?
+You only need to checkout correcly to this branch and have installed node & npm
+then run the script:
 
- ## Index
- - Assesment_1: Introduction of the class 
- - Assesment_2: Small recopilation of the most famous fails on the tech industry
+```
+npm i
+```
+
+## build/start
+To transpile code form TS to JS run the command:
+```
+npm run start
+``` 
+Will run the tsc and the node comand under the index.js generated
+
+## testing 
+Run the command on the same level as the package.json: 
+```
+npm run test
+```
+
+
+
+
