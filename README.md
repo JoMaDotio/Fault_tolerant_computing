@@ -23,6 +23,12 @@ Run the command on the same level as the package.json:
 npm run test
 ```
 
+## Notes
+In case that you run into a issue running the command, should be related to the installation for the packages
+In worst case, you have to run
+```
+npm i -g typescript jest
+```
 
 
 
