@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Adivinanza Numérica</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: url('background.gif') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+
+        input[type="number"] {
+            width: 100px; /* Aumenta el ancho del input */
+            height: 40px; /* Aumenta la altura del input */
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #message {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #score-label, #attempts-label {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        #score, #attempts {
+            font-size: 24px;
+            color: #007BFF;
+        }
+
+        #input-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Juego de Adivinanza Numérica</h1>
+        <p>Adivina el número secreto entre 1 y 100.</p>
+        <div id="input-container">
+            <input type="number" id="guessInput">
+            <button type="button" onclick="checkGuess()">Adivinar</button>
+        </div>
+        <button type="button" onclick="resetGame()">Reset</button>
+        <p id="message"></p>
+        <p id="score-label">Puntuación actual: <span id="score">0</span></p>
+        <p id="attempts-label">Intentos: <span id="attempts">0</span></p>
+    </div>
+
+    <script>
+       let secretNumber, score, attempts;
+
+        // Función para guardar los datos en localStorage
+        function saveGameData() {
+            localStorage.setItem('secretNumber', secretNumber);
+            localStorage.setItem('score', score);
+            localStorage.setItem('attempts', attempts);
+        }
+
+        // Función para cargar los datos desde localStorage
+        function loadGameData() {
+            secretNumber = parseInt(localStorage.getItem('secretNumber')) || Math.floor(Math.random() * 100) + 1;
+            score = parseInt(localStorage.getItem('score')) || 0;
+            attempts = parseInt(localStorage.getItem('attempts')) || 0;
+
+            // Actualizar la puntuación y los intentos en la página
+            document.getElementById('score').textContent = score;
+            document.getElementById('attempts').textContent = attempts;
+        }
+
+        // Cargar los datos al cargar la página
+        window.addEventListener('load', loadGameData);
+
+        // Guardar los datos antes de cerrar la página o recargar
+        window.addEventListener('beforeunload', saveGameData);
+
+        function resetGame() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            score = 0;
+            attempts = 0;
+            localStorage.clear(); // Borrar todos los datos del localStorage
+            document.getElementById('score').textContent = score;
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('message').textContent = '';
+            document.getElementById('guessInput').value = '';
+        }
+
+        function checkGuess() {
+            const guess = parseInt(document.getElementById('guessInput').value);
+
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                document.getElementById('message').textContent = 'Ingresa un número válido entre 1 y 100.';
+                return;
+            }
+
+            attempts++;
+            document.getElementById('attempts').textContent = attempts;
+
+            if (guess === secretNumber) {
+                document.getElementById('message').textContent = `¡Felicidades! Adivinaste el número secreto (${secretNumber}) en ${attempts} intentos.`;
+                score++;
+                document.getElementById('score').textContent = score;
+
+                // Guarda la puntuación y los intentos en localStorage
+                localStorage.setItem('score', score);
+                localStorage.setItem('attempts', attempts);
+
+                // Genera un nuevo número secreto y reinicia los intentos
+                resetGame();
+            } else if (guess < secretNumber) {
+                document.getElementById('message').textContent = 'El número secreto es mayor.';
+            } else {
+                document.getElementById('message').textContent = 'El número secreto es menor.';
+            }
+
+            saveGameData();
+        }
+
+        function resetGame() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('message').textContent = '';
+            attempts = 0;
+            document.getElementById('attempts').textContent = attempts;
+        }
+
+        // Inicializa el juego al cargar la página
+        resetGame();
+    </script>
+</body>
+</html>
