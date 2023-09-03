@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego de Adivinanza de Palabras</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #264653; /* Color de fondo */
+      margin: 0;
+    }
+
+    .container {
+      background: #ffffff; /* Mezcla de colores de fondo */
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h1, p, form, ol, #resultado {
+      padding: 20px;
+    }
+
+    ol {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    ol li {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 5px;
+      background-image: linear-gradient(to right, #F4A261, #E76F51);
+      background-repeat: no-repeat;
+      background-size: 0% 100%;
+      transition: background-size 0.3s ease-in-out;
+    }
+
+    li {
+      background-color: #F2F2F2;
+    }
+
+    button {
+      background: linear-gradient(to bottom, #F4A261, #E76F51); /* Mezcla de colores de fondo */
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      color: white;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #264653; /* Cambio de color al pasar el ratón */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Juego de Adivinanza de Palabras</h1>
+    <p>Adivina la palabra:</p>
+    <form id="adivinanza-form">
+      <input type="text" name="adivinanza" id="adivinanza" required>
+      <button type="submit">Adivinar</button>
+    </form>
+    <div id="resultado"></div>
+    <p>Intentos realizados: <span id="intentos">0</span></p>
+    <ol id="intentos-list"></ol>
+
+    <!-- Botones de Reiniciar y Detener Servidor -->
+    <button id="reiniciar-btn">Reiniciar</button>
+    <button id="detener-servidor-btn">Detener Servidor</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      fetch('/obtener-informacion-inicial')
+        .then(response => response.json())
+        .then(data => {
+          const intentosSpan = document.getElementById('intentos');
+          const intentosList = document.getElementById('intentos-list');
+
+          // Actualiza la información de la página con los datos recibidos
+          intentosSpan.textContent = data.intentos;
+
+          // Limpia la lista de intentos en la interfaz
+          intentosList.innerHTML = '';
+          data.adivinanzasIncorrectas.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${item.adivinanza} (${item.puntaje})`;
+            intentosList.appendChild(listItem);
+          });
+        })
+        .catch(error => console.error(error));
+
+
+      const formulario = document.getElementById('adivinanza-form');
+      const resultado = document.getElementById('resultado');
+      const intentosSpan = document.getElementById('intentos');
+      const intentosList = document.getElementById('intentos-list');
+      let intentos = 0;
+
+      const reiniciarBtn = document.getElementById('reiniciar-btn');
+      reiniciarBtn.addEventListener('click', function () {
+        reiniciarJuego();
+      });
+
+      // Botón de Detener Servidor
+      const detenerServidorBtn = document.getElementById('detener-servidor-btn');
+      detenerServidorBtn.addEventListener('click', function () {
+        detenerServidor();
+      });
+
+      function reiniciarJuego() {
+          // Realiza una solicitud AJAX para reiniciar el juego
+          fetch('/reiniciar', {
+            method: 'POST',
+          })
+            .then(response => response.json())
+            .then(data => {
+              intentos = 0;
+              intentosSpan.textContent = intentos;
+              intentosList.innerHTML = '';
+              resultado.textContent = 'Juego reiniciado.';
+            })
+            .catch(error => console.error(error));
+        }
+
+      function detenerServidor() {
+        // Realiza una solicitud AJAX para detener el servidor
+        fetch('/detener-servidor', {
+          method: 'GET',
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.detenido) {
+              resultado.textContent = 'El servidor se ha detenido.';
+            } else {
+              resultado.textContent = 'Error al detener el servidor.';
+            }
+          })
+          .catch(error => console.error(error));
+      }
+
+      formulario.addEventListener('submit', function (e) {
+        e.preventDefault(); // Evita que se envíe el formulario de forma predeterminada
+
+        const adivinanza = document.getElementById('adivinanza').value;
+
+        // Realiza una solicitud AJAX al servidor
+        fetch('/adivinar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ adivinanza }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            // Muestra la respuesta del servidor en el elemento resultado
+            if (data.resultado === 'correcto') {
+              resultado.textContent = `¡Correcto! Has adivinado la palabra con un puntaje de ${data.puntaje} en ${data.intentos} intentos.`;
+            } else {
+              resultado.textContent = `Incorrecto.`
+            }
+
+            // Actualiza el contador de intentos
+            intentos = data.intentos;
+            intentosSpan.textContent = intentos;
+
+            // Ordena y muestra la lista de intentos por puntuación
+            const sortedIntentos = data.adivinanzasIncorrectas.sort((a, b) => b.puntaje - a.puntaje);
+            intentosList.innerHTML = '';
+            sortedIntentos.forEach(item => {
+              const listItem = document.createElement('li');
+              listItem.textContent = `${item.adivinanza} (${item.puntaje})`;
+              intentosList.appendChild(listItem);
+            });
+          })
+          .catch(error => console.error(error));
+
+        document.getElementById('adivinanza').value = ''; // Limpia el campo de adivinanza
+      });
+
+    });    
+  </script>
+</body>
+</html>

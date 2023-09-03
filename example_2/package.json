@@ -1,0 +1,19 @@
+{
+  "name": "example_2",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "description": "Guess a secret word game with express and state save on a file",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd ./src && nodemon ./index.js",
+    "prod": "cd ./src && node ./index.js"
+  },
+  "author": "JoMaDotio",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.18.2",
+    "levenshtein-edit-distance": "^3.0.1",
+    "nodemon": "^3.0.1"
+  }
+}
