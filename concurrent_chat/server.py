@@ -80,7 +80,7 @@ def main():
         client_thread.start()
 
     stop_thread.join()
-    client_address.join()
+    client_thread.join()
 
 if __name__ == "__main__":
     main()
