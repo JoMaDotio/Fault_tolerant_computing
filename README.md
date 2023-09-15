@@ -40,6 +40,7 @@ Once we have the library, we are good to goo, the script is pretty simple, we ju
 #### The server command
 As you probably see, its a weird string with 2 comannds in it, and yes, that is the actuall command string of the process runing on the system, how I know this: Simple, run the task manager and right click on a header and mark the opcion, command line 
 ![Task manager command line](images/image-1.png)
+
 Ta da!, you have the commands of all the scripts running on your computer
 
 ### Part two: Download NSSM
@@ -67,11 +68,14 @@ nssm install private_chat
 ```
 Probably will ask your to give it access, click yes and this window will pop up
 ![NSSM GUI](images/image-3.png)
+
 step 4: We need to fill the field, we need to add the absolute path for python and for our script location, this is my case:
 ![Alt text](images/image-4.png)
+
 And hit install button
 Step 5: See the service, go to the service app, and look for it, and then start it up, to see if is working or nothing bad happend
 ![Alt text](images/image-5.png)
+
 If all go well, you will see the service on execution, and just had to test it out
 Step 6: Run the client to send messages:
 ![Alt text](images/image-6.png)
