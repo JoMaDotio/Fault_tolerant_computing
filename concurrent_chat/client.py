@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Configuración del cliente
-HOST = 'localhost'  # Cambia a la dirección IP o nombre de dominio del servidor
+HOST = '127.0.0.1'  # Cambia a la dirección IP o nombre de dominio del servidor
 PORT = 8080
 
 # Crear un socket del cliente

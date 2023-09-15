@@ -20,6 +20,8 @@ server.bind((HOST, PORT))
 
 # Lista para mantener un registro de todos los clientes conectados
 clients = {}
+clients_threads: threading.Thread = []
+
 
 # Función para transmitir mensajes a todos los clientes
 def broadcast(message, client_socket):
@@ -44,7 +46,6 @@ def remove(client_socket):
 # Función principal para manejar las conexiones de los clientes
 def handle_client(client_socket):
     try:
-        client_socket.send("Ingrese su nombre: ".encode('utf-8'))
         name = client_socket.recv(1024).decode('utf-8')
         print(f"{name} se ha conectado.")
         clients[client_socket] = name
@@ -66,21 +67,24 @@ def handle_client(client_socket):
 def main():
     server.listen(5)
     print("Servidor de chat en ejecución en el puerto", PORT)
-    
     # Inicia un hilo para detener el servidor
     stop_thread = threading.Thread(target=stop_server)
     stop_thread.start()
 
     while server_running:
+        print("Running")
         client_socket, client_address = server.accept()
         print("Conexión establecida desde:", client_address)
         clients[client_socket] = ""
         # Iniciar un hilo para manejar al cliente
         client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+        clients_threads.append(client_thread)
         client_thread.start()
 
     stop_thread.join()
     client_thread.join()
+    for client_thread in clients_threads:
+        client_thread.join()
 
 if __name__ == "__main__":
     main()

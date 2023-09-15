@@ -4,17 +4,15 @@ import time
 
 # Comando de inicio del servidor de chat (windows)
 # El comando se conforma del path al ejecutable de pythom + espacio + el path del archivo ejecutado (windows)
-SERVER_START_COMMAND = "C:\\Windows\\py.exe D:\\server.py"
+SERVER_START_COMMAND = "C:\\Windows\\py.exe D:\\local_server\\server.py"
 
 def is_server_running():
     for process in psutil.process_iter(attrs=['pid', 'cmdline']):
         if process.info['cmdline'] and SERVER_START_COMMAND in ' '.join(process.info['cmdline']):
-            print("ENCONTRADO")
             return True
     return False
 
 def start_server():
-    print("Iniciando el servidor de chat...")
     subprocess.Popen(SERVER_START_COMMAND, shell=True)
 
 def main():
