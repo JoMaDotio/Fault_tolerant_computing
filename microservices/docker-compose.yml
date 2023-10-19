@@ -1,0 +1,7 @@
+version: '3'
+services:
+  user-microservice:
+    build:
+      context: ./users
+    ports:
+      - "3000:3000"
