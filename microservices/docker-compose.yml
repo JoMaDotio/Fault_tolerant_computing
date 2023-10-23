@@ -5,3 +5,8 @@ services:
       context: ./users
     ports:
       - "3000:3000"
+  boards-microservice:
+    build: 
+      context: ./boards
+    ports:
+      - "3001:3001"
