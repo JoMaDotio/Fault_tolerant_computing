@@ -1,4 +1,4 @@
-export interface List {
+export interface BoardList {
     listId: number,
     name: string,
     boardId: string
