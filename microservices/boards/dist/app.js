@@ -7,12 +7,14 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const boardController_1 = __importDefault(require("./controllers/boardController"));
 const listsController_1 = __importDefault(require("./controllers/listsController"));
+const cardController_1 = __importDefault(require("./controllers/cardController"));
 const app = (0, express_1.default)();
 const port = 3001;
 app.use(body_parser_1.default.json());
 // Agrega las rutas para el modelo de tableros
 app.use('/boards', boardController_1.default);
 app.use('/lists', listsController_1.default);
+app.use('/cards', cardController_1.default);
 app.listen(port, () => {
     console.log(`El servidor está escuchando en el puerto ${port}`);
 });

@@ -1,4 +1,4 @@
-export interface Card {
+export interface BoardCard {
     cardId: number,
     title: string,
     description: string,
