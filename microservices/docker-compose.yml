@@ -10,3 +10,8 @@ services:
       context: ./boards
     ports:
       - "3001:3001"
+  comments-microservice:
+    build: 
+      context: ./comments
+    ports:
+      - "3002:3002"
