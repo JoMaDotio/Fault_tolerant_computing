@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boards-microservice-deployment
+  labels: 
+    app: boardsService
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: boardsService
+  template:
+    metadata:
+      labels:
+        app: boardsService
+    spec:
+      containers:
+      - name: user-microservice
+        image: jomadotio/board_microservice:v1
+        ports:
+        - containerPort: 3001
+        resources:
+          requests: 
+            memory: "50Mi"
+            cpu: "200m"
+          limits:
+            memory: "200Mi"
+            cpu: "1000m"
+          
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: boards-service
+spec:
+  selector:
+    app: boardsService
+  ports:
+  - protocol: TCP
+    port: 3001
+    targetPort: 3001
+  type: LoadBalancer
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: boards-autoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: boards-microservice-deployment
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 1
