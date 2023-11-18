@@ -1,0 +1,7 @@
+version: '3'
+services:
+  client-app:
+    image: my-trello-app:v1
+    build: .
+    ports:
+      - 3003:3003
