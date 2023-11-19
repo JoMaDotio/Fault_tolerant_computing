@@ -15,7 +15,7 @@ spec:
         app: clientApp
     spec:
       containers:
-      - name: user-microservice
+      - name: client-trello
         image: jomadotio/my-trello:v1
         ports:
         - containerPort: 3003

@@ -1,153 +1,112 @@
-# Introduction to Kubernetes
-Once we achive to have multiple "enviroments" in the same computer, for testing/develop/etc, it's time to go on production mode
-The plan is to achive this using toll like kubernetes, that offers us the oportinity to have multiple instances of the same image called "Pods", create services for our Pods to comunicate to the external world, and even create "directives/intruccions" of what to do if certain condition happend on resource focus.
+# Kubernetes
 
-So for this assessment we used the previuos microservice that we create for the assesment on docker, and start working on creating our local producction enviroment  (I didn't want to speend some money yet, to host everthing on a cloud service).
+## What is Kubernetes?
+Kubernetes is a platform/service planed to create automated tasks, scalate and make aplications works in containers, whichones are more ligth and portables that having a whole productions enviroment (server, cluster, networking, etc.) that help us to administrate the life cicle of our app and failure tolerance
 
-## Our App
-As mentiond before we are using the same microservices from the previus assessment, but now it has more endpoints and we also created a new microservice for the comments that goes onto the cards in a list.
-I craeted the 3 deploys files, with the services for loadBalancing and the Horizotal Pod Autoscaler (HPA), one for each microservice.
+The 3 main concepts are the Pod, services, and deployments:
+ - Pod: We can see it like a container on docker, literally it works like that but with different name
+ - Services: The pods by itself will no have a way to comunicate with the external world, the services, help us to achive that, exist multiple types of services, that are created to achive certain behaviour.
+ - Its the main soruce of creation for the pods and Services (this doesn't mean that you cannot create a pod/service without a deployment) it help us, to have organiced the resoruces that we need, that way we can easly deploy our app
+## What is an Ingress?
+It's a resource that administrate the external access to services inside a cluster. Allowing us to configurate the rules of routing. It gives us a a way to expose the services in a controlled and flexible way.
+## What is a LoadBalancer?
+It's a resource that distribute the trafic on the network on a balanced way beteween all the pods to ensure the aviability and scalability of all the resources, it help us also to expose the services to the world.
 
-### Note
-Due the fact that I lack a lot of resources on my machine, I created and took the evidence that the services are working individually bc I I had the 3 of them and tested at same time, those little pods consume almos all the resources hahaha
+### Our App
+It's time to create now our client side for our app, bc we need a fancy way to use our microservices and be ussefull for something. Bc we are doing a clone of the trello app, I decide to create it using react with Next.js.
 
-### How to: Set all for use kubernetes
-To been able to use kubernetes, we need to have the tools needed for that, in my case I activated the kubernetes services that are packted down on docker desktop app
-I just went  to configuration on the docker app, and there is a section for Kubernetes, just enable and acept and will install evething. But you can go and install any tool that you prefer the most, I saw that exist multiple wrappers for the core functionallity of kubernetes (Are almso the same, just they have their own naming or nomenclature). I will recomment to stick to the normal kubernetes from the docs, the tutorials are really good ones.
+So for first instance, we are creating the MOCK of landing page, the login, and register, just to ensure the functionality of the app, and see if the deploy works as main pourpuse of the practice.
 
-Once the instalaction of kubernetes is done, you can just run the command:
+#### The client app
+##### The bad landing page
+Yes I know it sucks, but i'm not that good, on desing of the beautty of the web page, for that reason, bc it's a mock, I will keep it simple.
+![langind_page](./images/trello_home.jpg)
+Tada haha, I will upgrade it on heach iteration, bc also we are missing the 80% of the funciontality (the boards, lists, and cards)
+
+##### The login page.
+It is a simple login page, nothing from other world.
+![loging](./images/trello_login.jpg)
+
+##### The register page.
+The same as the login, just simple register.
+![register](./images/trello_registro.jpg)
+
+#### The interesting stuff the deployment
+##### The docker stuff
+The first thing we need to do is the image on docker, for that reason, we create the dockfile, with the instrucctions of how we need to create the app, and run it
+```Docker
+FROM node:20
+
+WORKDIR /app
+
+COPY package.json ./
+COPY tsconfig.json ./
+
+RUN npm i
+
+COPY next.config.js ./next.config.js
+COPY src ./src
+COPY public ./public
+COPY next-env.d.ts ./next-env.d.ts
+
+RUN npm run build
+
+CMD ["npm", "run", "start"]
 ```
-kubectl //On a terminal/powershell/bash/zh/etc and should display the list of commands and etc.
-```
-With that we confirm that we have kubernetes already working, if something else happend (go and look for a tutorial on youtube, there is a lot good ones)
 
-#### Docker images and docker hub
-With kubernetes already working, we need to create our images and ist's convenient to push it on Docker hub
-That's because kubernetes need to get the image from where the pods will be build, and is the image do not exist on the machine, I need to look for it, that the reason, why I recomend to build your images, and pushed into the Docker Hub (Give a good name), on my case you can find out the my imagenes used looking for my userName: *jomadotio*, here is also a image for reference
-![Docker images on Docker Hub](./images/images_docker.jpg)
-
-### Kubernetes
-I will be cool to explain how to create a pods from comand, and all the commands that we need, but of course you will not read this hahaa I kown you, been said that
-I'll explain hot to make a file with all the needed configuration that way we only need to run a command and all will be deployed to test it out.
-
-#### Creating our pods
-
-First thing, to achive this it's needed to crate the configuration file, in a specific format and extension, this is made ussing a "Yamel file" (.yml)
-in this kind of file we set all the values, following the doc realted to the sintax and special key words
-
+Once we have it ready, we build the image, to ensure that it works, and nothing failed, we can now, crete a container to ensure that it works as expected, I did it, using a docker-compose:
 ```yaml
-# user_deployment.yml
-apiVersion: apps/v1 #comes from the docs
-kind: Deployment # Declare the type in this case a deploy
+version: '3'
+services:
+  client-app:
+    image: my-trello-app:v1
+    build: .
+    ports:
+      - 3003:3003
+```
+Simple, we just create the service, the image, from where it has to build, and the ports needed to expose the app.
+Once we have it running and see the home page, ready to Kubernetes.
+
+##### The cubernetes stuff
+Now we have to push our image to the docker hub, to ensure that it can be build it, if the image isn't found on the local docker.
+And we create the deployment file with the service:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: boards-microservice-deployment # The name of the deploy
+  name: client-deployment
   labels: 
-    app: boardsService # This label is importan, all out services and hpa to find the resources
+    app: clientApp
 spec:
-  replicas: 1 # Amount of replicas
+  replicas: 1
   selector:
     matchLabels:
-      app: boardsService # A way to select the replicas
+      app: clientApp
   template:
     metadata:
       labels:
-        app: boardsService # the label should assing to the pod
+        app: clientApp
     spec:
       containers:
-      - name: user-microservice # The actual name of the pod
-        image: jomadotio/board_microservice:v1 # the image from the pod will built
+      - name: client-trello
+        image: jomadotio/my-trello:v1
         ports:
-        - containerPort: 3001 # The port for our service
-        resources: # here we define the resources we want to give and limit
-          requests: 
-            memory: "50Mi" 
-            cpu: "200m"
-          limits:
-            memory: "200Mi"
-            cpu: "1000m"
-```
-
-As you can see, looks pretty simple, once you understand the structure
-Once we have it, we can make our first deploy by running the next command:
-```
-kubectl apply -f the_file_name.yml //in this case user_deployment.yml
-```
-This command will make a deploy and create the pods, and you will see somthing line this:
-![example of a pod](./images/user_pods.jpg)
-but will be only one 
-
-### How I test it? - Creating a service
-If you try and test the pod, just created will face this couple of questions:
- - To where should I send the reques?
- - That it?, I do not have to do something related to the internal network or something like that?
- - Duckkk, how I test it?
-Don't worry I come across with those questions too, and let me explaint realquick what append.
-
-Once we have our pod, we only created a mini-computer running our app, in a internal networking on your computer, but we never set some configuration to know expose the port, how to send the request, etc.
-For that the seriveces on kubernetes play a huge rool, bc ussing it, we can create the logical connection to the app, and see the results
-There excist a couple of services, but for our case, I will explain the loadBalancer (bc is the only one I needded)
-
-```yaml
-apiVersion: v1 # From docs
-kind: Service # Type
+        - containerPort: 3003
+---
+apiVersion: v1
+kind: Service
 metadata:
-  name: users-service # Name of the serivice
+  name: client-service
 spec:
   selector:
-    app: usersService # The tag for all the resources, should target
+    app: clientApp
   ports:
-  - protocol: TCP # protocol
-    port: 3000 # external port
-    targetPort: 3000 # Internal port (pod port)
-  type: LoadBalancer # redirect the request to perform the best
+  - protocol: TCP
+    port: 3003
+    targetPort: 3003
+  type: NodePort
 ```
-As you can the service is to simple too, an straigth forward, with now you will able to test the api ussing the localhost and the port assgined and will see the response
 
-### WE NEED MORE, A LOT OF USER! - Creating a HPA
-We have our service working, but let simulate a real world eviroment, what will happend if a loot of users make a request, the times will be so long, and the health of the service will be poor, to avoid that, we need to create a rule, that says if some condition happend, do this.
+Were we define the pod crated and also the service, in this case, bc it's just a web page, I create the service as type NodePort, that it will open a port for it (yes, for a some reason it decide a random port not like the loadbalancer type, that respect the port that you give it haha)
 
-For that, is the Horizontal Pod Autoscaler (HPA), this is a set of instruccion where we can define, the condition, and once it meets, in our case, do another deploy that way we can have multiple pods, without been stick on the cluster, wating to run other command to enable a new pod manually.
-
-```yaml
-apiVersion: autoscaling/v2 # From the docs
-kind: HorizontalPodAutoscaler # Define that is a HPA
-metadata:
-  name: user-autoscaler # The name assigned to the HPA
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1 # What is targetting
-    kind: Deployment # Type of the target
-    name: users-microservice-deployment # And the name of the target
-  minReplicas: 1 # Min of replicas (pods)
-  maxReplicas: 4 # Max of replicas
-  metrics: # The metric ussed to do a deployment
-  - type: Resource # Looking into the resources
-    resource:
-      name: cpu # Looking into the CPU
-      target:
-        type: Utilization
-        averageUtilization: 1 # For demo pourpuse, also the api is lightwwight, if a pod get to 1% of ussage for the cpu assigned, it created a new deploy
-```
-As you can see, same history, we need to paly arround with the commands, and at the end, will get our file, that explain all.
-In my case for demo pourposes, I selected the 1% of the computational power and create a new pod, just to thest the funtionallity itself
-
-But to make the HPA to create a new deploy, we need to do a kind a test to start consuming CPU, for that we make a load test ussing postmant, making a lot of request into the endpoints, just to stress it, and start creating the new deploys
-![Load testing of the API](./images/load_testing_postman.jpg)
-
-Meanwhile the test is running, you can see the pods geting created and working fine
-![HPA rule](./images/hpa.jpg)
-![PODS created](./images/user_pods.jpg)
-You can se that 2 pods, where created once we achive the threshhold
-
-And that it, now you have our oun production env, that will auto scalate as it needs, ready for the real world.
-
-## Evidences
-### User Microservice
-![User microservice Pod](./images/user_pods.jpg)
-![User microservice HPA](./images/hpa.jpg)
-### Boards Microservice
-![Boards Microservice Top Pods](./images/board_pods.jpg)
-![Boards Microservice HPA](./images/board_hpa.jpg)
-### Comments microservice
-![Comments Microservice Top Pods](./images/comments_pod.jpg)
-![Comments Microservice HPA](./images/comments_hpa.jpg)
+And that all folks!!
